@@ -200,7 +200,7 @@ time_table_insert = """
                EXTRACT(ISODOW FROM tm)
         
         FROM  (SELECT DISTINCT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' as tm FROM staging_events 
-                     WHERE ts IS NOT NULL;)
+                     WHERE ts IS NOT NULL);
 
 """
 
