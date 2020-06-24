@@ -18,7 +18,7 @@ time_table_drop = "DROP TABLE IF EXISTS time_dim;"
 # CREATE TABLES
 
 staging_events_table_create= """CREATE TABLE staging_events(
-    event_id INT IDENTITY(0,1) PRIMARY KEY,
+    event_id INT IDENTITY(0,1),
     artist VARCHAR,
     auth VARCHAR,
     firstName VARCHAR,
@@ -40,7 +40,7 @@ staging_events_table_create= """CREATE TABLE staging_events(
     );"""
 
 staging_songs_table_create = """ CREATE TABLE staging_songs(
-    song_id VARCHAR PRIMARY KEY,
+    song_id VARCHAR,
     num_songs INT, 
     artist_id VARCHAR, 
     artist_latitude FLOAT8,
@@ -54,29 +54,29 @@ staging_songs_table_create = """ CREATE TABLE staging_songs(
 
 songplay_table_create = """ CREATE TABLE songplays(
     songplay_id INT IDENTITY(0,1) PRIMARY KEY,
-    start_time TIMESTAMP sortkey NOT NULL,
-    user_id INT NOT NULL,
-    level VARCHAR ,
-    song_id VARCHAR distkey NOT NULL,
-    artist_id VARCHAR NOT NULL,
-    session_id INT NOT NULL,
-    location VARCHAR ,
+    start_time TIMESTAMP sortkey,
+    user_id INT,
+    level VARCHAR,
+    song_id VARCHAR distkey,
+    artist_id VARCHAR,
+    session_id INT,
+    location VARCHAR,
     user_agent VARCHAR 
 );
 """
 
 user_table_create = """ CREATE TABLE users(
-    user_id INT  PRIMARY KEY ,
-    first_name VARCHAR ,
-    last_name VARCHAR ,
-    gender VARCHAR , 
+    user_id INT  PRIMARY KEY,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    gender VARCHAR, 
     level VARCHAR 
 )
 DISTSTYLE all;
 """
 
 song_table_create = """ CREATE TABLE songs(
-    song_id VARCHAR  PRIMARY KEY ,
+    song_id VARCHAR  PRIMARY KEY,
     title VARCHAR,
     artist_id VARCHAR,
     year INT,
@@ -85,7 +85,7 @@ song_table_create = """ CREATE TABLE songs(
 """
 
 artist_table_create = """ CREATE TABLE artists(
-    artist_id VARCHAR  PRIMARY KEY ,
+    artist_id VARCHAR  PRIMARY KEY,
     name VARCHAR,
     location VARCHAR,
     latitude FLOAT8,
@@ -158,7 +158,7 @@ user_table_insert = """
         level
         
     FROM staging_events
-    WHERE userId IS NOT NULL;
+    WHERE page = 'NextSong';
 """
 
 song_table_insert = """
@@ -171,8 +171,7 @@ song_table_insert = """
         year,
         duration
         
-    FROM staging_songs
-    WHERE song_id IS NOT NULL;
+    FROM staging_songs;
 """
 
 artist_table_insert = """
@@ -185,13 +184,12 @@ artist_table_insert = """
         artist_longitude
     
     
-   FROM staging_songs
-   WHERE artist_id IS NOT NULL;
+   FROM staging_songs;
 """
 
 time_table_insert = """ 
     INSERT INTO time_dim(start_time, hour, day, WEEK, MONTH, year, weekday)
-        SELECT tm,
+        SELECT start_time AS tm,
                EXTRACT(HOUR FROM tm),
                EXTRACT(DAY FROM tm),
                EXTRACT(WEEK FROM tm),
@@ -199,9 +197,7 @@ time_table_insert = """
                EXTRACT(YEAR FROM tm),
                EXTRACT(weekday FROM tm)
         
-        FROM  (SELECT DISTINCT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' as tm FROM staging_events )
-        WHERE tm IS NOT NULL
-        ;
+        FROM  songplays;
 
 """
 
