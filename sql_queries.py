@@ -34,7 +34,7 @@ staging_events_table_create= """CREATE TABLE staging_events(
     sessionId INT,
     song VARCHAR,
     status INT,
-    ts BIGINT,
+    ts NUMERIC,
     userAgent VARCHAR,
     userId INT       
     );"""
@@ -195,12 +195,13 @@ time_table_insert = """
                EXTRACT(HOUR FROM tm),
                EXTRACT(DAY FROM tm),
                EXTRACT(WEEK FROM tm),
-               EXTRACT(YEAR FROM tm),
                EXTRACT(MONTH FROM tm),
-               EXTRACT(ISODOW FROM tm)
+               EXTRACT(YEAR FROM tm),
+               EXTRACT(weekday FROM tm)
         
-        FROM  (SELECT DISTINCT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' as tm FROM staging_events 
-                     WHERE ts IS NOT NULL);
+        FROM  (SELECT DISTINCT TIMESTAMP 'epoch' + ts/1000 * INTERVAL '1 second' as tm FROM staging_events )
+        WHERE tm IS NOT NULL
+        ;
 
 """
 
